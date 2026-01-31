@@ -1,0 +1,5 @@
+# No external dependencies required!
+# Built with Python 3.6+ standard library
+
+# Optional: For enhanced terminal colors
+# colorama>=0.4.4

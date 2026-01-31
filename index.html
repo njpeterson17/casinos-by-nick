@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blackjack 🎰</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        
+        .game-container {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 900px;
+            width: 95%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        
+        .table {
+            background: linear-gradient(135deg, #0d5a3b 0%, #1a7a4a 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            min-height: 300px;
+        }
+        
+        .hand-section {
+            margin: 20px 0;
+        }
+        
+        .hand-title {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .cards {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            min-height: 80px;
+        }
+        
+        .card {
+            width: 60px;
+            height: 84px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 5px;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .card.red {
+            color: #d32f2f;
+        }
+        
+        .card.black {
+            color: #212121;
+        }
+        
+        .card-value {
+            font-size: 1.2em;
+        }
+        
+        .card-suit {
+            font-size: 1.5em;
+            text-align: center;
+        }
+        
+        .card-back {
+            background: linear-gradient(135deg, #b71c1c 0%, #d32f2f 100%);
+            border: 2px solid white;
+        }
+        
+        .hand-value {
+            text-align: center;
+            font-size: 1.2em;
+            margin-top: 10px;
+            color: #ffd700;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-hit {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .btn-stand {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .btn-double {
+            background: #9c27b0;
+            color: white;
+        }
+        
+        .btn-new {
+            background: #2196f3;
+            color: white;
+        }
+        
+        .message {
+            text-align: center;
+            font-size: 1.5em;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .bet-section {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .bet-input {
+            padding: 10px 20px;
+            font-size: 1.2em;
+            border-radius: 10px;
+            border: none;
+            text-align: center;
+            width: 150px;
+        }
+        
+        .result-win {
+            background: rgba(76, 175, 80, 0.3);
+            animation: pulse 1s ease-in-out;
+        }
+        
+        .result-lose {
+            background: rgba(244, 67, 54, 0.3);
+        }
+        
+        .result-push {
+            background: rgba(255, 193, 7, 0.3);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .blackjack {
+            color: #ffd700;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+        
+        .busted {
+            color: #f44336;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 600px) {
+            .card {
+                width: 50px;
+                height: 70px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            button {
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎰 Blackjack 🎰</h1>
+        
+        <div class="stats-bar">
+            <div class="stat">
+                <div class="stat-label">Bankroll</div>
+                <div class="stat-value" id="bankroll">$1000</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Current Bet</div>
+                <div class="stat-value" id="current-bet">$0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Wins</div>
+                <div class="stat-value" id="wins">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Losses</div>
+                <div class="stat-value" id="losses">0</div>
+            </div>
+        </div>
+        
+        <div class="table">
+            <div class="hand-section">
+                <div class="hand-title">
+                    👔 Dealer's Hand
+                    <span id="dealer-value"></span>
+                </div>
+                <div class="cards" id="dealer-cards"></div>
+            </div>
+            
+            <div class="message" id="message">Place your bet and click Deal to start!</div>
+            
+            <div class="hand-section">
+                <div class="hand-title">
+                    😎 Your Hand
+                    <span id="player-value"></span>
+                </div>
+                <div class="cards" id="player-cards"></div>
+            </div>
+        </div>
+        
+        <div class="bet-section" id="bet-section">
+            <label>Bet Amount: $</label>
+            <input type="number" class="bet-input" id="bet-amount" value="100" min="10" max="1000" step="10">
+        </div>
+        
+        <div class="controls">
+            <button class="btn-new" id="btn-deal" onclick="deal()">Deal</button>
+            <button class="btn-hit" id="btn-hit" onclick="hit()" disabled>Hit</button>
+            <button class="btn-stand" id="btn-stand" onclick="stand()" disabled>Stand</button>
+            <button class="btn-double" id="btn-double" onclick="doubleDown()" disabled>Double Down</button>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let bankroll = 1000;
+        let currentBet = 0;
+        let deck = [];
+        let playerHand = [];
+        let dealerHand = [];
+        let gameState = 'betting'; // betting, playing, dealer, ended
+        let stats = { wins: 0, losses: 0, pushes: 0 };
+
+        // Card definitions
+        const suits = ['♠', '♥', '♦', '♣'];
+        const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+
+        // Load stats from localStorage
+        function loadStats() {
+            const saved = localStorage.getItem('blackjackStats');
+            if (saved) {
+                const data = JSON.parse(saved);
+                bankroll = data.bankroll || 1000;
+                stats = data.stats || { wins: 0, losses: 0, pushes: 0 };
+                updateStats();
+            }
+        }
+
+        // Save stats to localStorage
+        function saveStats() {
+            localStorage.setItem('blackjackStats', JSON.stringify({
+                bankroll: bankroll,
+                stats: stats
+            }));
+        }
+
+        // Create deck
+        function createDeck() {
+            deck = [];
+            for (let suit of suits) {
+                for (let rank of ranks) {
+                    deck.push({ suit, rank });
+                }
+            }
+            shuffleDeck();
+        }
+
+        // Shuffle deck
+        function shuffleDeck() {
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+        }
+
+        // Deal a card
+        function dealCard() {
+            if (deck.length < 10) {
+                createDeck();
+            }
+            return deck.pop();
+        }
+
+        // Calculate hand value
+        function calculateValue(hand) {
+            let value = 0;
+            let aces = 0;
+
+            for (let card of hand) {
+                if (card.rank === 'A') {
+                    aces++;
+                    value += 11;
+                } else if (['J', 'Q', 'K'].includes(card.rank)) {
+                    value += 10;
+                } else {
+                    value += parseInt(card.rank);
+                }
+            }
+
+            while (value > 21 && aces > 0) {
+                value -= 10;
+                aces--;
+            }
+
+            return value;
+        }
+
+        // Check if blackjack
+        function isBlackjack(hand) {
+            return hand.length === 2 && calculateValue(hand) === 21;
+        }
+
+        // Create card HTML
+        function createCardHTML(card, hidden = false) {
+            if (hidden) {
+                return '<div class="card card-back"></div>';
+            }
+            const isRed = card.suit === '♥' || card.suit === '♦';
+            const colorClass = isRed ? 'red' : 'black';
+            return `
+                <div class="card ${colorClass}">
+                    <div class="card-value">${card.rank}</div>
+                    <div class="card-suit">${card.suit}</div>
+                    <div class="card-value" style="transform: rotate(180deg)">${card.rank}</div>
+                </div>
+            `;
+        }
+
+        // Update display
+        function updateDisplay() {
+            document.getElementById('bankroll').textContent = `$${bankroll}`;
+            document.getElementById('current-bet').textContent = `$${currentBet}`;
+            document.getElementById('wins').textContent = stats.wins;
+            document.getElementById('losses').textContent = stats.losses;
+
+            // Player cards
+            const playerCardsEl = document.getElementById('player-cards');
+            playerCardsEl.innerHTML = playerHand.map(card => createCardHTML(card)).join('');
+            const playerValue = calculateValue(playerHand);
+            document.getElementById('player-value').textContent = `(${playerValue})`;
+
+            // Dealer cards
+            const dealerCardsEl = document.getElementById('dealer-cards');
+            if (gameState === 'playing' || gameState === 'betting') {
+                // Hide second card during play
+                dealerCardsEl.innerHTML = createCardHTML(dealerHand[0]) + createCardHTML(null, true);
+                document.getElementById('dealer-value').textContent = '';
+            } else {
+                dealerCardsEl.innerHTML = dealerHand.map(card => createCardHTML(card)).join('');
+                document.getElementById('dealer-value').textContent = `(${calculateValue(dealerHand)})`;
+            }
+        }
+
+        // Update buttons
+        function updateButtons() {
+            const betSection = document.getElementById('bet-section');
+            const btnDeal = document.getElementById('btn-deal');
+            const btnHit = document.getElementById('btn-hit');
+            const btnStand = document.getElementById('btn-stand');
+            const btnDouble = document.getElementById('btn-double');
+
+            if (gameState === 'betting') {
+                betSection.style.display = 'block';
+                btnDeal.disabled = false;
+                btnHit.disabled = true;
+                btnStand.disabled = true;
+                btnDouble.disabled = true;
+            } else if (gameState === 'playing') {
+                betSection.style.display = 'none';
+                btnDeal.disabled = true;
+                btnHit.disabled = false;
+                btnStand.disabled = false;
+                btnDouble.disabled = playerHand.length !== 2 || bankroll < currentBet;
+            } else {
+                betSection.style.display = 'none';
+                btnDeal.disabled = false;
+                btnHit.disabled = true;
+                btnStand.disabled = true;
+                btnDouble.disabled = true;
+                btnDeal.textContent = 'New Game';
+            }
+        }
+
+        // Show message
+        function showMessage(text, type = '') {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = 'message ' + type;
+        }
+
+        // Deal button
+        function deal() {
+            if (gameState !== 'betting' && gameState !== 'ended') return;
+
+            // Get bet
+            const betInput = document.getElementById('bet-amount');
+            const bet = parseInt(betInput.value);
+
+            if (bet > bankroll) {
+                showMessage(`Insufficient funds! You have $${bankroll}`);
+                return;
+            }
+            if (bet < 10) {
+                showMessage('Minimum bet is $10!');
+                return;
+            }
+
+            currentBet = bet;
+            bankroll -= bet;
+            gameState = 'playing';
+
+            // Reset hands
+            playerHand = [];
+            dealerHand = [];
+
+            // Create deck if needed
+            if (deck.length < 20) {
+                createDeck();
+            }
+
+            // Deal initial cards
+            playerHand.push(dealCard());
+            dealerHand.push(dealCard());
+            playerHand.push(dealCard());
+            dealerHand.push(dealCard());
+
+            updateDisplay();
+            updateButtons();
+
+            // Check for blackjacks
+            if (isBlackjack(playerHand) || isBlackjack(dealerHand)) {
+                endGame();
+            } else {
+                showMessage('Your turn! Hit, Stand, or Double Down?');
+            }
+        }
+
+        // Hit button
+        function hit() {
+            if (gameState !== 'playing') return;
+
+            playerHand.push(dealCard());
+            updateDisplay();
+
+            const value = calculateValue(playerHand);
+            if (value > 21) {
+                showMessage('Busted!', 'result-lose');
+                endGame();
+            } else if (value === 21) {
+                stand();
+            }
+        }
+
+        // Stand button
+        function stand() {
+            if (gameState !== 'playing') return;
+
+            gameState = 'dealer';
+            updateDisplay();
+            dealerTurn();
+        }
+
+        // Double down button
+        function doubleDown() {
+            if (gameState !== 'playing' || playerHand.length !== 2 || bankroll < currentBet) return;
+
+            bankroll -= currentBet;
+            currentBet *= 2;
+            playerHand.push(dealCard());
+            
+            updateDisplay();
+
+            const value = calculateValue(playerHand);
+            if (value > 21) {
+                showMessage('Busted!', 'result-lose');
+                endGame();
+            } else {
+                stand();
+            }
+        }
+
+        // Dealer turn
+        function dealerTurn() {
+            showMessage('Dealer\'s turn...');
+            
+            setTimeout(() => {
+                while (calculateValue(dealerHand) < 17) {
+                    dealerHand.push(dealCard());
+                    updateDisplay();
+                }
+                endGame();
+            }, 1000);
+        }
+
+        // End game
+        function endGame() {
+            gameState = 'ended';
+            updateDisplay();
+
+            const playerValue = calculateValue(playerHand);
+            const dealerValue = calculateValue(dealerHand);
+
+            let message = '';
+            let resultClass = '';
+
+            // Check blackjacks
+            if (isBlackjack(playerHand) && isBlackjack(dealerHand)) {
+                message = '🤝 Both have Blackjack! Push!';
+                resultClass = 'result-push';
+                bankroll += currentBet;
+                stats.pushes++;
+            } else if (isBlackjack(playerHand)) {
+                const winAmount = Math.floor(currentBet * 2.5);
+                message = `🎉 Blackjack! You win $${winAmount - currentBet}!`;
+                resultClass = 'result-win';
+                bankroll += winAmount;
+                stats.wins++;
+            } else if (isBlackjack(dealerHand)) {
+                message = '😞 Dealer has Blackjack! You lose!';
+                resultClass = 'result-lose';
+                stats.losses++;
+            } else if (playerValue > 21) {
+                message = '💥 You busted! Dealer wins!';
+                resultClass = 'result-lose';
+                stats.losses++;
+            } else if (dealerValue > 21) {
+                const winAmount = currentBet * 2;
+                message = `🎉 Dealer busted! You win $${currentBet}!`;
+                resultClass = 'result-win';
+                bankroll += winAmount;
+                stats.wins++;
+            } else if (playerValue > dealerValue) {
+                const winAmount = currentBet * 2;
+                message = `🎉 You win $${currentBet}! (${playerValue} vs ${dealerValue})`;
+                resultClass = 'result-win';
+                bankroll += winAmount;
+                stats.wins++;
+            } else if (dealerValue > playerValue) {
+                message = `😞 Dealer wins! (${dealerValue} vs ${playerValue})`;
+                resultClass = 'result-lose';
+                stats.losses++;
+            } else {
+                message = `🤝 Push! It's a tie at ${playerValue}`;
+                resultClass = 'result-push';
+                bankroll += currentBet;
+                stats.pushes++;
+            }
+
+            showMessage(message, resultClass);
+            updateDisplay();
+            updateButtons();
+            saveStats();
+
+            if (bankroll <= 0) {
+                setTimeout(() => {
+                    showMessage('💸 You\'re broke! Refresh to start over with $1000.', 'result-lose');
+                    bankroll = 1000;
+                    saveStats();
+                }, 3000);
+            }
+        }
+
+        // Initialize
+        createDeck();
+        loadStats();
+        updateDisplay();
+        updateButtons();
+    </script>
+</body>
+</html>
