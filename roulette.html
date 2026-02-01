@@ -272,7 +272,7 @@
         }
         
         .bet-btn.green {
-            background: #0d47a1;
+            background: #2e7d32;
             color: white;
         }
         
@@ -391,6 +391,13 @@
             </div>
         </div>
         
+        <div class="history-section" style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; margin-bottom: 15px; text-align: center;">
+            <div style="color: #888; font-size: 0.9em; margin-bottom: 5px;">Last 10 Spins</div>
+            <div id="spin-history" style="display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;">
+                <span style="color: #666; font-style: italic;">No spins yet</span>
+            </div>
+        </div>
+        
         <div class="roulette-area">
             <div class="wheel-section">
                 <div class="wheel" id="wheel">
@@ -452,6 +459,7 @@
         let bankroll = 1000;
         let currentBets = [];
         let isSpinning = false;
+        let spinHistory = [];
         
         // Load from localStorage
         function loadGame() {
@@ -549,6 +557,32 @@
             return redNumbers.includes(num) ? 'red' : 'black';
         }
         
+        function addToHistory(number, color) {
+            spinHistory.unshift({ number, color });
+            if (spinHistory.length > 10) {
+                spinHistory.pop();
+            }
+            updateHistoryDisplay();
+        }
+        
+        function updateHistoryDisplay() {
+            const historyEl = document.getElementById('spin-history');
+            if (spinHistory.length === 0) {
+                historyEl.innerHTML = '<span style="color: #666; font-style: italic;">No spins yet</span>';
+                return;
+            }
+            
+            const colorMap = {
+                'red': '#d32f2f',
+                'black': '#212121',
+                'green': '#2e7d32'
+            };
+            
+            historyEl.innerHTML = spinHistory.map(spin => 
+                `<span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: ${colorMap[spin.color]}; color: white; font-weight: bold; font-size: 0.9em; border: 2px solid #ffd700;">${spin.number}</span>`
+            ).join('');
+        }
+        
         function checkWin(number, bet) {
             const color = getNumberColor(number);
             
@@ -607,6 +641,9 @@
                 const resultEl = document.getElementById('result');
                 resultEl.textContent = resultNumber;
                 resultEl.className = 'result-display result-' + resultColor;
+                
+                // Add to history
+                addToHistory(resultNumber, resultColor);
                 
                 // Calculate winnings
                 let totalWin = 0;
